@@ -1,6 +1,7 @@
 import Image from "next/image"
 import type { YoutubeItem } from "@/app/lib/types"
 import { getLatestVideos } from "@/app/lib/youtubeData"
+import { decode } from "he"
 
 export async function VideoCard() {
   const videos = await getLatestVideos()
@@ -12,7 +13,7 @@ export async function VideoCard() {
         .slice(0, 8)
         .map((video: YoutubeItem, index: number) => {
           const id = video.id.videoId
-          const title = video.snippet.title
+          const title = decode(video.snippet.title)
           const date = video.snippet.publishedAt
 
           return (

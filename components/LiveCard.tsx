@@ -1,6 +1,7 @@
 import Image from "next/image"
 import type { YoutubeItem } from "@/app/lib/types"
 import { getLatestLives } from "@/app/lib/youtubeData"
+import { decode } from "he"
 
 export async function LiveCard() {
   const lives = await getLatestLives()
@@ -9,7 +10,7 @@ export async function LiveCard() {
     <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
       {lives.map((live: YoutubeItem) => {
         const id = live.id.videoId
-        const title = live.snippet.title
+        const title = decode(live.snippet.title)
         const date = live.snippet.publishedAt
 
         return (

@@ -16,7 +16,9 @@
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "better-auth": "^1.6.26",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
+    "express": "^5.2.1",
     "he": "^1.2.0",
     "next": "^16.2.12",
     "npm": "^12.0.1",
@@ -28,6 +30,8 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/he": "^1.2.3",
     "@types/node": "^26.1.1",
     "@types/pg": "^8.21.0",

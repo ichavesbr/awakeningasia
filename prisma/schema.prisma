@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("customer") // "customer" | "admin"
+  createdAt DateTime @default(now())
+
+  addresses Address[]
+  orders    Order[]
+
+  @@map("users")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int      @default(0)
+  imageUrl    String?
+  categoryId  String
+  createdAt   DateTime @default(now())
+
+  category   Category    @relation(fields: [categoryId], references: [id])
+  orderItems OrderItem[]
+
+  @@map("products")
+}
+
+model Address {
+  id         String  @id @default(uuid())
+  userId     String
+  street     String
+  number     String
+  complement String?
+  city       String
+  state      String
+  zipCode    String
+  country    String  @default("BR")
+
+  user   User    @relation(fields: [userId], references: [id])
+  orders Order[]
+
+  @@map("addresses")
+}
+
+model Order {
+  id        String   @id @default(uuid())
+  userId    String
+  addressId String
+  status    String   @default("pending") // pending | paid | shipped | cancelled
+  total     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+
+  user    User        @relation(fields: [userId], references: [id])
+  address Address     @relation(fields: [addressId], references: [id])
+  items   OrderItem[]
+  payment Payment?
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2) // preço no momento da compra
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Payment {
+  id                    String   @id @default(uuid())
+  orderId               String   @unique
+  stripePaymentIntentId String?  @unique
+  status                String   @default("pending") // pending | succeeded | failed
+  amount                Decimal  @db.Decimal(10, 2)
+  createdAt             DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@map("payments")
+}

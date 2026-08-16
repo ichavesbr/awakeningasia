@@ -2,58 +2,72 @@
 
 Institutional website for Awakening Asia, a church based in Ueno, Japan.
 
-Complete rebuild of the previous version, which was a basic Next.js site. This new version is a fully redesigned, production-ready website built from scratch.
+Complete rebuild of the previous version, which lacked design consistency and media optimization. This new version is a fully redesigned, production-ready website built from scratch with a focus on performance, maintainability, responsive design, and content accessibility.
 
-The rebuild focused on performance, maintainability, responsive design, and content accessibility. It centralizes the church's online presence with information about the ministry, events, livestreams, and media content through direct integration with the YouTube Data API.
+## Documentation
+
+- **Notion:** https://awakeningasia.notion.site/Awakening-Asia-3bdba216e0b480bc9ce2e077608944ba?pvs=74
+---
+
+## 1. Project Overview & Roadmap (概要とロードマップ)
+
+### Objectives & Scope
+- **Performance & Standardization:** Standardized typography, color palettes, and layouts; optimized asset delivery to stabilize Core Web Vitals.
+- **User Experience:** Restructured information architecture for seamless navigation.
+- **Analytics:** Integration of Vercel Analytics and Speed Insights for user geography and traffic monitoring.
+
+### Roadmap
+- [x] Access Metrics & Analytics
+- [ ] Database Integration
+- [ ] Authentication System
+- [ ] CMS (microCMS) with Role-Based Access Control (Admin, Pastors, Guests)
+- [ ] E-commerce Module
 
 ---
 
-## Stack
+## 2. Architecture & Tech Stack (アーキテクチャ・技術スタック)
 
-| Tool | Version |
+| Layer / Tool | Technology & Version |
 | --- | --- |
-| Framework | Next.js 16 (App Router) |
-| UI | React 19 + Tailwind CSS v4 |
+| Framework & Backend | Next.js 16 (App Router, API Routes / Server Actions) |
+| UI & Styling | React 19 + Tailwind CSS v4 |
+| Database & ORM | PostgreSQL (Neon Serverless) + Prisma |
 | Validation | Zod v4 |
 | Testing | Vitest |
 | Language | TypeScript |
-| Analytics | Vercel Analytics + Speed Insights |
+| Deployment & Hosting | Vercel (CI/CD Pipelines) |
+
+> **Contingency Plan / Future Scale (Plan B):** Should traffic grow significantly or business requirements demand heavy background processing / complex microservices, the backend can be migrated to **NestJS (TypeScript)** hosted on **AWS (ECS/EC2 + RDS)** managed via Terraform and Docker. Currently deferred as the current e-commerce scope is lightweight.
 
 ---
 
-## Pages
+## 3. Pages & Features (ページ構成)
 
 ### `/` — Home
-
-- Animated hero section with parallax image
+- Hero section with animations
 - Scroll-triggered `FadeIn` animations via `IntersectionObserver`
 - Sections for vision, ministry overview, and call-to-action links
 
 ### `/about`
-
 - Modular sections: `VisionSection`, `PastorsSection`, `StatementOfFaith`, `AboutSection`
 
 ### `/contact`
-
 - Contact form with client-side Zod validation
 - Fields: name, email, subject, message — all with inline error feedback
 
 ### `/events`
-
 - Upcoming events listing with date, time, location, venue, and tags
 
 ### `/lives`
-
 - Fetches and displays recent YouTube videos and completed livestreams via YouTube Data API v3
 - Separate grids for `VideoCard` and `LiveCard`
 
 ### `404`
-
 - Custom not-found page
 
 ---
 
-## YouTube Integration
+## 4. YouTube Integration
 
 Centralized fetch layer at `app/lib/youtube.ts` using YouTube Data API v3:
 
@@ -64,8 +78,9 @@ Centralized fetch layer at `app/lib/youtube.ts` using YouTube Data API v3:
 
 ---
 
-## Environment Variables
+## 5. Getting Started & Development (開発ガイド)
 
+### Environment Variables
 Create a `.env.local` file based on `env-example`:
 
 ```env
@@ -73,10 +88,7 @@ API_KEY=key_here
 CHANNEL_ID=key_here
 ```
 
----
-
-## Getting Started
-
+### Installation & Run
 ```bash
 npm install
 npm run dev
@@ -84,10 +96,6 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
----
-
-## Tests
-
+### Tests
 ```bash
 npm run test
-```

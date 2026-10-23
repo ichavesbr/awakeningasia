@@ -9,7 +9,7 @@ export default function Header() {
 
   const navLinks: NavLink[] = [
     { href: "/about", label: "About" },
-    { href: "/school", label: "School" },
+    // { href: "/school", label: "School" },
     { href: "/events", label: "Events" },
     { href: "/lives", label: "Lives" },
     { href: "/join", label: "Join" },

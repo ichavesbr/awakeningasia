@@ -1,13 +1,50 @@
 "use client"
 
-import { useActionState } from "react"
-import { formAction } from "./actions"
+import { useRef, useState } from "react"
+import { contactFormSchema } from "../lib/zodSchema"
+
+type FormStatus = "idle" | "pending" | "success" | "error"
+type FieldErrors = Partial<Record<"name" | "email" | "subject" | "message", string[]>>
 
 export default function ContactPage() {
-  const [data, action, isPending] = useActionState(formAction, null)
+  const [status, setStatus] = useState<FormStatus>("idle")
+  const [errors, setErrors] = useState<FieldErrors>({})
+  const formRef = useRef<HTMLFormElement>(null)
 
   const fieldClass =
     "w-full bg-dark-800 border border-dark-600 text-stone-200 text-sm font-light px-4 py-3 placeholder:text-stone-700 focus:outline-none focus:border-gold-600 transition-colors duration-200"
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    const result = contactFormSchema.safeParse(Object.fromEntries(formData))
+
+    if (!result.success) {
+      setErrors(result.error.flatten().fieldErrors as FieldErrors)
+      return
+    }
+
+    setErrors({})
+    setStatus("pending")
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ access_key: process.env.NEXT_PUBLIC_FORM_API_KEY, ...result.data }),
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        setStatus("success")
+        formRef.current?.reset()
+      } else {
+        setStatus("error")
+      }
+    } catch {
+      setStatus("error")
+    }
+  }
 
   return (
     <main className="min-h-screen bg-dark-900">
@@ -26,15 +63,14 @@ export default function ContactPage() {
 
       <section className="py-24">
         <div className="max-w-3xl mx-auto px-6">
-          <form action={action} className="space-y-6" noValidate>
-            <input type="hidden" name="apikey" value="f86cd165-d79b-4ad8-9a2b-a1159bf6e0ea"></input>
+          <form ref={formRef} onSubmit={handleSubmit} className="space-y-6" noValidate>
             <div className="grid sm:grid-cols-2 gap-6">
               <div>
                 <label className="section-label block mb-2" htmlFor="name">
                   Name
                 </label>
                 <input id="name" name="name" type="text" placeholder="Your name" className={fieldClass} />
-                {data?.errors?.name && <p className="text-red-500 text-xs mt-1">{data?.errors?.name[0]}</p>}
+                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name[0]}</p>}
               </div>
 
               <div>
@@ -42,7 +78,7 @@ export default function ContactPage() {
                   Email
                 </label>
                 <input id="email" name="email" type="email" placeholder="your@email.com" className={fieldClass} />
-                {data?.errors?.email && <p className="text-red-500 text-xs mt-1">{data?.errors?.email[0]}</p>}
+                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email[0]}</p>}
               </div>
             </div>
 
@@ -51,7 +87,7 @@ export default function ContactPage() {
                 Subject
               </label>
               <input id="subject" name="subject" type="text" placeholder="How can we help?" className={fieldClass} />
-              {data?.errors?.subject && <p className="text-red-500 text-xs mt-1">{data?.errors?.subject[0]}</p>}
+              {errors.subject && <p className="text-red-500 text-xs mt-1">{errors.subject[0]}</p>}
             </div>
 
             <div>
@@ -65,16 +101,17 @@ export default function ContactPage() {
                 placeholder="Write your message here..."
                 className={`${fieldClass} resize-none`}
               />
-              {data?.errors?.message && <p className="text-red-500 text-xs mt-1">{data?.errors?.message[0]}</p>}
+              {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message[0]}</p>}
             </div>
 
             <button
               type="submit"
-              disabled={isPending}
+              disabled={status === "pending"}
               className="px-8 py-3 border border-gold-600 text-gold-400 text-xs tracking-widest uppercase font-medium transition-all duration-200 hover:bg-gold-500 hover:text-dark-900 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-3">
-              {isPending ? "Sending..." : "Send Message"}
+              {status === "pending" ? "Sending..." : "Send Message"}
             </button>
-            {data?.status === "success" && (
+
+            {status === "success" && (
               <div className="border border-dark-600 p-10 text-center">
                 <div className="w-10 h-px bg-gold-400 mx-auto mb-6" />
                 <h3 className="font-serif text-3xl text-stone-100 font-light mb-3">
@@ -85,7 +122,8 @@ export default function ContactPage() {
                 </p>
               </div>
             )}
-            {data?.status === "error" && !data?.errors && (
+
+            {status === "error" && (
               <div className="border border-dark-600 p-10 text-center">
                 <div className="w-10 h-px bg-gold-400 mx-auto mb-6" />
                 <h3 className="font-serif text-3xl text-stone-100 font-light mb-3">
